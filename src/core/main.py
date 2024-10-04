@@ -1,5 +1,6 @@
 import sys
-sys.path.append("..")
+src_path = os.path.dirname(os.path.abspath(__file__)) + "/../"
+sys.path.append(src_path + "..")
 from utils.Visualization import *
 from FlexiFed import *
 import warnings
@@ -27,7 +28,7 @@ if __name__ == '__main__':
     '''Test Client'''
     for uid in range(num_clients):
         Server.Clients[uid].model.load_state_dict(
-            torch.load("../../model/{} {}/{}/Client{}.pkl".format(family_name,dataset_name,strategy,uid),
+            torch.load(sys.path[-1] + "../model/{} {}/{}/Client{}.pkl".format(family_name,dataset_name,strategy,uid),
                        map_location=torch.device('cpu')))
         test_idx=Server.Clients[uid].test_idx
         print("[strategy:{},uid:{}] Accuracy:{}".format(

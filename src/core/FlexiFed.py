@@ -46,11 +46,11 @@ class ParameterServer():
         '''Save the convergence process'''
         print(self.acc)
         df=pd.DataFrame(self.acc)
-        df.to_csv("../../result/{} {}/{}/result.csv".format(family_name,data_name,strategy),index=False)
+        df.to_csv(sys.path[-1] + "../result/{} {}/{}/result.csv".format(family_name,data_name,strategy),index=False)
         '''Save the Client's model'''
         for uid in range(self.num_clients):
             torch.save(self.Clients[uid].model.state_dict(),
-                       "../../model/{} {}/{}/Client{}.pkl".format(family_name,data_name,strategy,uid))
+                       sys.path[-1] + "../model/{} {}/{}/Client{}.pkl".format(family_name,data_name,strategy,uid))
 
 
     '''Basic_Common Strategy'''
