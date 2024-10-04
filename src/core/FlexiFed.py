@@ -2,7 +2,6 @@ import pandas as pd
 import os
 from Client import *
 import warnings
-import threading
 warnings.filterwarnings("ignore")
 
 class ParameterServer():
@@ -13,31 +12,23 @@ class ParameterServer():
         self.Clients=get_ClientSet(num_clients,family_name,dataset_name,train_group,test_group)
         self.acc={i:[] for i in range(num_clients)}
         self.device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
     '''Clobal Training'''
     def ServerGlobalTraining(self,train_dataset,test_dataset,communication_round,strategy,family_name,data_name):
         localData_len=len(self.Clients[0].train_idx)/10
         start=0
         for epoch in range(communication_round):
             end=start+localData_len
-            threads=[]
             '''Local Traing'''
             for uid in range(self.num_clients):
                 idx_train=self.Clients[uid].train_idx
                 idx_batch=idx_train[int(start):int(end)]
                 idx_test=self.Clients[uid].test_idx
-                # model_dict=self.Clients[uid].ClientLocalTraining(self.device,train_dataset,idx_batch)
-                # acc=self.Clients[uid].ClientLocalTesting(self.device,test_dataset,idx_test)
-                # self.acc[uid].append(acc)
-                # print("[epoch:%d,uid:%d] acc:%.5f"%(epoch,uid,acc))
-                # print()
-                # self.Clients[uid].model.load_state_dict(model_dict) # maybe it could be commented out
-                thread = threading.Thread(target=self.train_and_test_client, args=(uid, train_dataset, test_dataset, idx_batch, idx_test, epoch))
-                threads.append(thread)
-                thread.start()
-            '''Waiting'''
-            for thread in threads:
-                thread.join()
+                model_dict=self.Clients[uid].ClientLocalTraining(self.device,train_dataset,idx_batch)
+                acc=self.Clients[uid].ClientLocalTesting(self.device,test_dataset,idx_test)
+                self.acc[uid].append(acc)
+                print("[epoch:%d,uid:%d] acc:%.5f"%(epoch,uid,acc))
+                print()
+                self.Clients[uid].model.load_state_dict(model_dict) # maybe it could be commented out
             start=end%int(len(train_dataset)/self.num_clients)
             print("[epoch:{},strategy:{}] Global Training ".format(epoch,strategy))
             print()
@@ -62,14 +53,6 @@ class ParameterServer():
             torch.save(self.Clients[uid].model.state_dict(),
                        os.environ['FLEXIFED_SRC_PATH'] + "../model/{} {}/{}/Client{}.pkl".format(family_name,data_name,strategy,uid))
 
-    '''Multi threads'''
-    def train_and_test_client(self, uid, train_dataset, test_dataset, idx_batch, idx_test, epoch):
-        model_dict = self.Clients[uid].ClientLocalTraining(self.device, train_dataset, idx_batch)
-        acc = self.Clients[uid].ClientLocalTesting(self.device, test_dataset, idx_test)
-        self.acc[uid].append(acc)
-        print("[epoch:%d,uid:%d] acc:%.5f" % (epoch, uid, acc))
-        print()
-        self.Clients[uid].model.load_state_dict(model_dict)
 
     '''Basic_Common Strategy'''
     def Basic_Common(self,Clients,uid_list):
@@ -84,7 +67,6 @@ class ParameterServer():
                 min_uid=uid
         common_base_layer_dict=Clients[min_uid].model.state_dict()
         common_base_layer_list=list(common_base_layer_dict.keys())
-
         # match the common base layers
         for uid in uid_list:
             layer_list=list(Clients[uid].model.state_dict().keys())
@@ -100,7 +82,6 @@ class ParameterServer():
                 else:
                     del common_base_layer_list[i:]
                     break
-
         # Aggregating the common base layer
         for name in common_base_layer_list:
             weight_comm=torch.zeros(common_base_layer_dict[name].size()).to(self.device)
