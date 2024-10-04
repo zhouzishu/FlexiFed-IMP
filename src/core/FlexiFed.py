@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 from Client import *
 import warnings
 warnings.filterwarnings("ignore")
@@ -46,11 +47,11 @@ class ParameterServer():
         '''Save the convergence process'''
         print(self.acc)
         df=pd.DataFrame(self.acc)
-        df.to_csv(sys.path[-1] + "../result/{} {}/{}/result.csv".format(family_name,data_name,strategy),index=False)
+        df.to_csv(os.environ['FLEXIFED_SRC_PATH'] + "../result/{} {}/{}/result.csv".format(family_name,data_name,strategy),index=False)
         '''Save the Client's model'''
         for uid in range(self.num_clients):
             torch.save(self.Clients[uid].model.state_dict(),
-                       sys.path[-1] + "../model/{} {}/{}/Client{}.pkl".format(family_name,data_name,strategy,uid))
+                       os.environ['FLEXIFED_SRC_PATH'] + "../model/{} {}/{}/Client{}.pkl".format(family_name,data_name,strategy,uid))
 
 
     '''Basic_Common Strategy'''

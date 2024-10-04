@@ -1,4 +1,4 @@
-import sys
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import math
@@ -7,11 +7,11 @@ warnings.filterwarnings("ignore")
 
 '''Visualization for acc'''
 def visualization(mode,dataset_name,communication_round,num_clients,family_name,uid_list):
-    df_B=pd.read_csv(sys.path[-1] + "../result/{} {}/Basic-Common/result.csv".format(family_name,dataset_name))
-    df_C=pd.read_csv(sys.path[-1] + "../result/{} {}/Clustered-Common/result.csv".format(family_name,dataset_name))
-    df_M=pd.read_csv(sys.path[-1] + "../result/{} {}/Max-Common/result.csv".format(family_name,dataset_name))
-    df_S=pd.read_csv(sys.path[-1] + "../result/{} {}/Standalone/result.csv".format(family_name,dataset_name))
-    df_CL=pd.read_csv(sys.path[-1] + "../result/{} {}/Clustered-FL/result.csv".format(family_name,dataset_name))
+    df_B=pd.read_csv(os.environ['FLEXIFED_SRC_PATH'] + "../result/{} {}/Basic-Common/result.csv".format(family_name,dataset_name))
+    df_C=pd.read_csv(os.environ['FLEXIFED_SRC_PATH'] + "../result/{} {}/Clustered-Common/result.csv".format(family_name,dataset_name))
+    df_M=pd.read_csv(os.environ['FLEXIFED_SRC_PATH'] + "../result/{} {}/Max-Common/result.csv".format(family_name,dataset_name))
+    df_S=pd.read_csv(os.environ['FLEXIFED_SRC_PATH'] + "../result/{} {}/Standalone/result.csv".format(family_name,dataset_name))
+    df_CL=pd.read_csv(os.environ['FLEXIFED_SRC_PATH'] + "../result/{} {}/Clustered-FL/result.csv".format(family_name,dataset_name))
     model_name={
         "VGG":["VGG-11","VGG-13","VGG-16","VGG-19"],
         "ResNet":["ResNet-20","ResNet-32","ResNet-44","ResNet-56"],

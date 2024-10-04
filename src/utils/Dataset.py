@@ -1,4 +1,3 @@
-import sys
 import csv
 import librosa
 import torch
@@ -28,7 +27,7 @@ def get_idx_dict(dataset,num_clients):
         
 '''get the dataset for training'''
 def get_dataset(dataset_name,family_name,num_clients):
-    dataset_path=sys.path[-1] + "../dataset/"
+    dataset_path=os.environ['FLEXIFED_SRC_PATH'] + "../dataset/"
     if dataset_name=="CIFAR-10":
         path=dataset_path+dataset_name
         mean=(0.4914, 0.4822, 0.4465)
