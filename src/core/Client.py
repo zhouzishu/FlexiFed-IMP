@@ -26,6 +26,10 @@ class Client():
         self.model.to(device)
         self.model.train()
         loss_func=nn.CrossEntropyLoss()
+
+        # loss_func = nn.NLLLoss().to(device)
+        # self.criterion_cosin = CosineSimilarityLoss(args.lambda1)
+
         optimizer=torch.optim.SGD(self.model.parameters(), lr=0.01, momentum=0.9, weight_decay=5e-4)
         # optimizer=torch.optim.Adam(self.model.parameters(), lr=0.01, weight_decay=5e-4)
         if self.dataset_name=="Speech-Commands":
@@ -70,13 +74,13 @@ def get_ClientSet(num_clients,family_name,dataset_name,train_group,test_group):
     if family_name=="ResNet":
         for uid in range(num_clients):
             if uid % 3 == 0:
-                client_dict[uid]=Client(uid,resnet50(input_channel,w,h,num_classes),
+                client_dict[uid]=Client(uid,resnet50(num_classes=num_classes),
                                         dataset_name,train_group[uid],test_group[uid])
             elif uid % 3 == 1:
-                client_dict[uid]=Client(uid,resnet101(input_channel,w,h,num_classes),
+                client_dict[uid]=Client(uid,resnet101(num_classes=num_classes),
                                         dataset_name,train_group[uid],test_group[uid])
             elif uid % 3 == 2:
-                client_dict[uid]=Client(uid,resnet152(input_channel,w,h,num_classes),
+                client_dict[uid]=Client(uid,resnet152(num_classes=num_classes),
                                         dataset_name,train_group[uid],test_group[uid])
         return client_dict
 
