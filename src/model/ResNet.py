@@ -62,6 +62,43 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
 
+class Bottleneck(nn.Module):
+    expansion = 4  # Expansion times of the number of channels
+
+    def __init__(self, in_planes, planes, stride=1, downsample=None):
+        super(Bottleneck, self).__init__()
+        self.conv1 = nn.Conv2d(in_planes, planes, kernel_size=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(planes)
+        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
+        self.bn2 = nn.BatchNorm2d(planes)
+        self.conv3 = nn.Conv2d(planes, planes * self.expansion, kernel_size=1, bias=False)
+        self.bn3 = nn.BatchNorm2d(planes * self.expansion)
+        self.relu = nn.ReLU(inplace=True)
+        self.downsample = downsample
+
+    def forward(self, x):
+        identity = x
+
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+
+        out = self.conv2(out)
+        out = self.bn2(out)
+        out = self.relu(out)
+
+        out = self.conv3(out)
+        out = self.bn3(out)
+
+        if self.downsample is not None:
+            identity = self.downsample(x)
+
+        out += identity
+        out = self.relu(out)
+
+        return out
+
+
 class BasicBlock(nn.Module):
     expansion=1 # Expansion times of the number of channels
     def __init__(self,in_planes,planes,stride=1,downsample=None):
@@ -107,6 +144,17 @@ def resnet44(input_channel,w,h,num_classes):
 
 def resnet56(input_channel,w,h,num_classes):
     return ResNet(BasicBlock,[9,9,9],input_channel,w,h,num_classes)
+
+
+# New
+def resnet50(input_channel, w, h, num_classes):
+    return ResNet(Bottleneck, [3, 4, 6, 3], input_channel, w, h, num_classes)
+
+def resnet101(input_channel, w, h, num_classes):
+    return ResNet(Bottleneck, [3, 4, 23, 3], input_channel, w, h, num_classes)
+
+def resnet152(input_channel, w, h, num_classes):
+    return ResNet(Bottleneck, [3, 8, 36, 3], input_channel, w, h, num_classes)
 
 # model1=resnet44(3,32,32,10)
 # model2=resnet56(3,32,32,10)

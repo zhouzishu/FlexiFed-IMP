@@ -2,13 +2,12 @@ import sys
 sys.path.append("..")
 
 from utils.Dataset import *
-from model.VGG import *
 from model.ResNet import *
-from model.CharCNN import *
-from model.VDCNN import *
 from torch.utils.data import DataLoader
 from random import shuffle
+import torch.nn as nn
 import warnings
+
 warnings.filterwarnings("ignore")
 
 class Client():
@@ -62,71 +61,23 @@ class Client():
 
 def get_ClientSet(num_clients,family_name,dataset_name,train_group,test_group):
     client_dict={}
-    input_channel,w,h=0,0,0
     num_classes=0
     if dataset_name=="CIFAR-10" or dataset_name=="CINIC-10":
         input_channel=3
         w,h=32,32
         num_classes=10
-    elif dataset_name=="Speech-Commands":
-        input_channel=1
-        w,h=32,32
-        num_classes=12
-    if family_name=="VGG":
-        num_arch=int(num_clients/4)
+    
+    if family_name=="ResNet":
         for uid in range(num_clients):
-            if math.floor(uid/num_arch)==0:
-                client_dict[uid]=Client(uid,vgg11_bn(input_channel,w,h,num_classes),
+            if uid % 3 == 0:
+                client_dict[uid]=Client(uid,resnet50(input_channel,w,h,num_classes),
                                         dataset_name,train_group[uid],test_group[uid])
-            elif math.floor(uid/num_arch)==1:
-                client_dict[uid]=Client(uid,vgg13_bn(input_channel,w,h,num_classes),
+            elif uid % 3 == 1:
+                client_dict[uid]=Client(uid,resnet101(input_channel,w,h,num_classes),
                                         dataset_name,train_group[uid],test_group[uid])
-            elif math.floor(uid/num_arch)==2:
-                client_dict[uid]=Client(uid,vgg16_bn(input_channel,w,h,num_classes),
+            elif uid % 3 == 2:
+                client_dict[uid]=Client(uid,resnet152(input_channel,w,h,num_classes),
                                         dataset_name,train_group[uid],test_group[uid])
-            elif math.floor(uid/num_arch)==3:
-                client_dict[uid]=Client(uid,vgg19_bn(input_channel,w,h,num_classes),
-                                        dataset_name,train_group[uid],test_group[uid])
-        return client_dict
-    elif family_name=="ResNet":
-        num_arch=int(num_clients/4)
-        for uid in range(num_clients):
-            if math.floor(uid/num_arch)==0:
-                client_dict[uid]=Client(uid,resnet20(input_channel,w,h,num_classes),
-                                        dataset_name,train_group[uid],test_group[uid])
-            elif math.floor(uid/num_arch)==1:
-                client_dict[uid]=Client(uid,resnet32(input_channel,w,h,num_classes),
-                                        dataset_name,train_group[uid],test_group[uid])
-            elif math.floor(uid/num_arch)==2:
-                client_dict[uid]=Client(uid,resnet44(input_channel,w,h,num_classes),
-                                        dataset_name,train_group[uid],test_group[uid])
-            elif math.floor(uid/num_arch)==3:
-                client_dict[uid]=Client(uid,resnet56(input_channel,w,h,num_classes),
-                                        dataset_name,train_group[uid],test_group[uid])
-        return client_dict
-    elif family_name=="CharCNN":
-        num_arch=int(num_clients/4)
-        for uid in range(num_clients):
-            if math.floor(uid/num_arch)==0:
-                client_dict[uid]=Client(uid,charcnn3(70,1014,4),dataset_name,train_group[uid],test_group[uid])
-            elif math.floor(uid/num_arch)==1:
-                client_dict[uid]=Client(uid,charcnn4(70,1014,4),dataset_name,train_group[uid],test_group[uid])
-            elif math.floor(uid/num_arch)==2:
-                client_dict[uid]=Client(uid,charcnn5(70,1014,4),dataset_name,train_group[uid],test_group[uid])
-            elif math.floor(uid/num_arch)==3:
-                client_dict[uid]=Client(uid,charcnn6(70,1014,4),dataset_name,train_group[uid],test_group[uid])
-        return client_dict
-    elif family_name=="VDCNN":
-        num_arch=int(num_clients/4)
-        for uid in range(num_clients):
-            if math.floor(uid/num_arch)==0:
-                client_dict[uid]=Client(uid,vdcnn9(69,1024,4),dataset_name,train_group[uid],test_group[uid])
-            elif math.floor(uid/num_arch)==1:
-                client_dict[uid]=Client(uid,vdcnn17(69,1024,4),dataset_name,train_group[uid],test_group[uid])
-            elif math.floor(uid/num_arch)==2:
-                client_dict[uid]=Client(uid,vdcnn29(69,1024,4),dataset_name,train_group[uid],test_group[uid])
-            elif math.floor(uid/num_arch)==3:
-                client_dict[uid]=Client(uid,vdcnn49(69,1024,4),dataset_name,train_group[uid],test_group[uid])
         return client_dict
 
 # num_clients=8

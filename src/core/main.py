@@ -11,8 +11,8 @@ warnings.filterwarnings("ignore")
 if __name__ == '__main__':
 
     '''Important Parameters'''
-    num_clients=8
-    family_name="VGG"
+    num_clients=6
+    family_name="ResNet"
     dataset_name="CIFAR-10"
     communication_round=70
     strategy="Max-Common"
